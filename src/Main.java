@@ -1,6 +1,10 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -11,7 +15,7 @@ public class Main {
 	public static String[] columns = null;
 	public static List<Integer> intList = null;
 
-	public static void put(JSONObject object, int i) {
+	public static void put(JSONObject object, int i) throws ParseException {
 		if (intList.contains(i)) {
 			System.out.println(columns[i]);
 			if(columns[i].length()==0){
@@ -19,9 +23,21 @@ public class Main {
 			}else{
 				object.put(columnTitle[i], Integer.parseInt(columns[i].replaceAll(",", "")));
 			}
+		// date 
+		}else if(i == 77){
+			object.put(columnTitle[i], getEpochTime(columns[i]));
 		} else {
 			object.put(columnTitle[i], columns[i]);
 		}
+	}
+	
+	public static long getEpochTime(String s) throws ParseException{
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+		Date date = format.parse(s);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		long millis = cal.getTimeInMillis();
+		return millis;
 	}
 
 	public static void main(String[] args) {
@@ -40,6 +56,7 @@ public class Main {
 					firstLine = false;
 				} else {
 					columns = thisLine.split("	");
+					
 
 					JSONObject object = new JSONObject();
 					// researcher
