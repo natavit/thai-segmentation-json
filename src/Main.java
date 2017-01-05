@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -22,15 +23,19 @@ public class Main {
 		// int
 		if (intList.contains(i)) {
 			if (columns[i].length() == 0) {
+				//nothing = 0 
 				object.put(columnTitle[i], 0);
 			} else {
 				object.put(columnTitle[i], Integer.parseInt(columns[i].replaceAll(",", "")));
 			}
-			// date
 		} else if (i == 77) {
+			// date
 			object.put(columnTitle[i], getEpochTime(columns[i]));
-			// string
+		} else if (i == 2) {
+			// exception: Type no need to segmentation
+			object.put(columnTitle[i], wordSegment(columns[i]));
 		} else {
+			// string
 			object.put(columnTitle[i], wordSegment(columns[i]));
 		}
 	}
@@ -45,7 +50,7 @@ public class Main {
 	}
 
 	public static String wordSegment(String s) throws IOException {
-		
+
 		int begin, end;
 		String result = "";
 		tokenizer.wordInstance(s);
@@ -59,17 +64,19 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws IOException {
-		
 
 		Integer[] intDataType = { 25, 41, 42, 48, 52 };
 		intList = Arrays.asList(intDataType);
 		tokenizer = new LongLexTo(new File("lexitron.txt"));
+		
+		PrintWriter writer = new PrintWriter("json/r2r59-8.json", "UTF-8");
 
 		String thisLine = null;
 		boolean firstLine = true;
+		int counter = 579;
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader("r2r59-9-cleaned.tsv"));
+			BufferedReader br = new BufferedReader(new FileReader("tsv/r2r59-8-cleaned.tsv"));
 			while ((thisLine = br.readLine()) != null) {
 				if (firstLine) {
 					columnTitle = thisLine.split("	");
@@ -102,7 +109,6 @@ public class Main {
 									JSONObject obj = new JSONObject();
 									for (int i = Integer.parseInt(inps[2].trim()); i <= Integer
 											.parseInt(inps[3].trim()); i++) {
-
 										put(obj, i);
 									}
 									object.put(inps[1].trim().toLowerCase(), obj);
@@ -124,13 +130,10 @@ public class Main {
 											.parseInt(inps[2].trim()); i++) {
 										object.put(columnTitle[i], columns[i]);
 										put(object, i);
-
 									}
 								} else if (inps.length == 2) {
 									String[] inpList = inps[1].split(",");
-
 									for (int i = 0; i < inpList.length; i++) {
-
 										put(object, Integer.parseInt(inpList[i].trim()));
 									}
 								}
@@ -139,13 +142,21 @@ public class Main {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
-					System.out.print(object);
+					
+					JSONObject innerObj = new JSONObject();
+					innerObj.put("_id", new Integer(counter++));
+					JSONObject countObj = new JSONObject();
+					countObj.put("index", innerObj);
+					writer.println(countObj);
+					writer.println(object);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		writer.close();
+		System.out.println("done "+counter);
+
 
 	}
 
