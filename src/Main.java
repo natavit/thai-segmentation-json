@@ -69,24 +69,24 @@ public class Main {
 		intList = Arrays.asList(intDataType);
 		tokenizer = new LongLexTo(new File("lexitron.txt"));
 		
-		PrintWriter writer = new PrintWriter("json/r2r59-8.json", "UTF-8");
+		PrintWriter writer = new PrintWriter("json/5.json", "UTF-8");
 
 		String thisLine = null;
 		boolean firstLine = true;
-		int counter = 579;
+		int counter = 1;
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader("tsv/r2r59-8-cleaned.tsv"));
+			BufferedReader br = new BufferedReader(new FileReader("tsv/5.tsv"));
 			while ((thisLine = br.readLine()) != null) {
 				if (firstLine) {
 					columnTitle = thisLine.split("	");
 					firstLine = false;
 				} else {
 					columns = thisLine.split("	");
-					columns[0] = "59-" + columns[0];
+					//columns[0] = "59-" + columns[0];
 
 					JSONObject object = new JSONObject();
-					// researcher
+					/*// researcher
 					JSONArray list = new JSONArray();
 					for (int i = 3; i <= 8; i++) {
 						JSONObject obj = new JSONObject();
@@ -95,10 +95,10 @@ public class Main {
 						list.add(obj);
 					}
 					object.put("researcher", list);
-
+*/
 					String inputLine = null;
 					try {
-						BufferedReader in = new BufferedReader(new FileReader("input"));
+						BufferedReader in = new BufferedReader(new FileReader("test"));
 						while ((inputLine = in.readLine()) != null) {
 							String[] inps = inputLine.split("-");
 							// o = object
