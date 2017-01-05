@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -14,24 +16,26 @@ public class Main {
 	public static String[] columnTitle = null;
 	public static String[] columns = null;
 	public static List<Integer> intList = null;
+	static LongLexTo tokenizer;
 
-	public static void put(JSONObject object, int i) throws ParseException {
+	public static void put(JSONObject object, int i) throws ParseException, IOException {
+		// int
 		if (intList.contains(i)) {
-			System.out.println(columns[i]);
-			if(columns[i].length()==0){
+			if (columns[i].length() == 0) {
 				object.put(columnTitle[i], 0);
-			}else{
+			} else {
 				object.put(columnTitle[i], Integer.parseInt(columns[i].replaceAll(",", "")));
 			}
-		// date 
-		}else if(i == 77){
+			// date
+		} else if (i == 77) {
 			object.put(columnTitle[i], getEpochTime(columns[i]));
+			// string
 		} else {
-			object.put(columnTitle[i], columns[i]);
+			object.put(columnTitle[i], wordSegment(columns[i]));
 		}
 	}
-	
-	public static long getEpochTime(String s) throws ParseException{
+
+	public static long getEpochTime(String s) throws ParseException {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
 		Date date = format.parse(s);
 		Calendar cal = Calendar.getInstance();
@@ -40,23 +44,39 @@ public class Main {
 		return millis;
 	}
 
-	public static void main(String[] args) {
+	public static String wordSegment(String s) throws IOException {
+		
+		int begin, end;
+		String result = "";
+		tokenizer.wordInstance(s);
+		begin = tokenizer.first();
+		while (tokenizer.hasNext()) {
+			end = tokenizer.next();
+			result += s.substring(begin, end) + " ";
+			begin = end;
+		}
+		return result.trim();
+	}
 
-		Integer[] intDataType = { 0, 25, 41, 42, 48, 52 };
+	public static void main(String[] args) throws IOException {
+		
+
+		Integer[] intDataType = { 25, 41, 42, 48, 52 };
 		intList = Arrays.asList(intDataType);
+		tokenizer = new LongLexTo(new File("lexitron.txt"));
 
 		String thisLine = null;
 		boolean firstLine = true;
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader("r2r59-9.tsv"));
+			BufferedReader br = new BufferedReader(new FileReader("r2r59-9-cleaned.tsv"));
 			while ((thisLine = br.readLine()) != null) {
 				if (firstLine) {
 					columnTitle = thisLine.split("	");
 					firstLine = false;
 				} else {
 					columns = thisLine.split("	");
-					
+					columns[0] = "59-" + columns[0];
 
 					JSONObject object = new JSONObject();
 					// researcher
@@ -73,7 +93,6 @@ public class Main {
 					try {
 						BufferedReader in = new BufferedReader(new FileReader("input"));
 						while ((inputLine = in.readLine()) != null) {
-							System.out.println(inputLine);
 							String[] inps = inputLine.split("-");
 							// o = object
 							if (inps[0].equals("o")) {
@@ -84,7 +103,7 @@ public class Main {
 									for (int i = Integer.parseInt(inps[2].trim()); i <= Integer
 											.parseInt(inps[3].trim()); i++) {
 
-										put(obj,i);
+										put(obj, i);
 									}
 									object.put(inps[1].trim().toLowerCase(), obj);
 								} else if (inps.length == 3) {
@@ -93,7 +112,7 @@ public class Main {
 									JSONObject obj = new JSONObject();
 									for (int i = 0; i < inpList.length; i++) {
 
-										put(obj,Integer.parseInt(inpList[i]));
+										put(obj, Integer.parseInt(inpList[i]));
 									}
 									object.put(inps[1].trim().toLowerCase(), obj);
 								}
@@ -104,7 +123,7 @@ public class Main {
 									for (int i = Integer.parseInt(inps[1].trim()); i <= Integer
 											.parseInt(inps[2].trim()); i++) {
 										object.put(columnTitle[i], columns[i]);
-										put(object,i);
+										put(object, i);
 
 									}
 								} else if (inps.length == 2) {
@@ -116,7 +135,6 @@ public class Main {
 									}
 								}
 							}
-
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
