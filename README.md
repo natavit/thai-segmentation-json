@@ -1,4 +1,4 @@
-> Currently use intetnally for mednacea project
+> Currently use internally for mednacea project
 
 # thai-segmentation-json
 This class is to semi-automatic segment Thai sentences and create a json file from .tsv (tab-separated values) file. 
